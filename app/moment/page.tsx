@@ -24,18 +24,14 @@ export default function Moment() {
     if (seedError) {
       console.error('Error seeding acts:', seedError)
     }
-
-    const { data } = await supabase
-      .from('user_acts')
-      .select('acts(text)')
-      .eq('active', true)
-      .eq('acts.heat', heat)
-
-    if (!data?.length) return
-
-    const row = data[Math.floor(Math.random() * data.length)]
-    const act = row.acts[0]
-    setAct(act.text)
+ 
+    const { data: act, error } = await supabase.rpc('get_random_act_for_user', {p_user_id: user.id, p_heat: heat})
+    if (error) {
+      console.error('Error getting random act: ', error)
+      return
+    }
+    console.log("chosen act: " + act)
+    setAct(act)
     setDuration([300, 600, 900][Math.floor(Math.random() * 3)])
   }
 
