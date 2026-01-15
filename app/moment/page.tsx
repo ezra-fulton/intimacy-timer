@@ -1,14 +1,30 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import HeatSelector from '@/components/HeatSelector'
-import Timer from '@/components/Timer'
+import { Timer } from '@/components/Timer'
 import { HeatLevel } from '@/lib/heat-levels'
+import { useRouter } from 'next/navigation'
+
+const SAVED_ENDS_AT  = 'moment_ends_at'
+const SAVED_ACT  = 'act'
 
 export default function Moment() {
   const [heat, setHeat] = useState<HeatLevel>('gentle')
   const [act, setAct] = useState<string | null>(null)
-  const [duration, setDuration] = useState<number | null>(null)
+  const router = useRouter()
+  const [endsAt, setEndsAt] = useState<number>(0)
+
+  useEffect(() => {
+       const savedEndsAt = window.localStorage.getItem(SAVED_ENDS_AT)
+       const savedAct = window.localStorage.getItem(SAVED_ACT)
+       if (savedEndsAt) {
+         setEndsAt(Number(savedEndsAt))
+       }
+       if (savedAct) {
+         setAct(savedAct)
+       }
+  }, [])
 
   async function start() {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -30,30 +46,50 @@ export default function Moment() {
       console.error('Error getting random act: ', error)
       return
     }
-    console.log("chosen act: " + act)
     setAct(act)
-    setDuration([300, 600, 900][Math.floor(Math.random() * 3)])
+    const chosenDuration = [300, 600, 900][Math.floor(Math.random() * 3)]
+    const end = Date.now() + chosenDuration * 1000
+    setEndsAt(end)
+    window.localStorage.setItem(SAVED_ENDS_AT, String(end))
+    window.localStorage.setItem(SAVED_ACT, act)
   }
 
-  if (act && duration) {
-    return (
-      <div className="p-6 flex flex-col gap-6 items-center">
-        <p className="text-xl text-center">{act}</p>
-        <Timer seconds={duration} />
-      </div>
-    )
+  function handleComplete() {
+    window.localStorage.removeItem(SAVED_ENDS_AT)
+    window.localStorage.removeItem(SAVED_ACT)
+    setEndsAt(0)
+    setAct(null)
+    router.push('/moment')
+  }
+
+  if (endsAt === 0) {
+	  return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-500 via-purple-600 to-indigo-600 p-4">
+	    <div className="p-6 flex flex-col gap-6">
+	      <HeatSelector value={heat} onChange={setHeat} />
+	      <button
+		onClick={start}
+		className="bg-white text-black p-4 rounded text-xl"
+	      >
+		Start a Moment
+	      </button>
+	    </div></div>
+	  )
   }
 
   return (
-    <div className="p-6 flex flex-col gap-6">
-      <HeatSelector value={heat} onChange={setHeat} />
-      <button
-        onClick={start}
-        className="bg-white text-black p-4 rounded text-xl"
-      >
-        Start a Moment
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-pink-500 via-purple-600 to-indigo-600 p-4">
+    <div className="p-6 flex flex-col gap-6 items-center">
+      <p className="text-3xl text-center">{act}</p>
+      {endsAt !== null && (
+        <Timer
+          endsAt={endsAt}
+          onComplete={handleComplete}
+        />
+      )} 
     </div>
-  )
+    </div>
+    )
+
 }
 
