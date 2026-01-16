@@ -31,7 +31,7 @@ export default function LoginPage() {
     const redirectUrl = process.env.NEXT_PUBLIC_APP_URL + '/moment'
 
     const { error } = await supabase.auth.signInWithOtp({
-      email:,
+      email,
       options: { emailRedirectTo: redirectUrl }
     })
 
