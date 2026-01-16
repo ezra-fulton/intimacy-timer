@@ -28,11 +28,11 @@ export default function LoginPage() {
     setLoading(true)
     setMessage('')
 
+    const redirectUrl = process.env.NEXT_PUBLIC_APP_URL + '/moment'
+
     const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: window.location.origin + '/moment', // redirect after magic link click
-      },
+      email:,
+      options: { emailRedirectTo: redirectUrl }
     })
 
     if (error) {
