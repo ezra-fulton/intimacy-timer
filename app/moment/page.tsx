@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import HeatSelector from '@/components/HeatSelector'
+import BottomButton from '@/components/BottomButton'
 import { Timer } from '@/components/Timer'
 import { HeatLevel } from '@/lib/heat-levels'
 import { useRouter } from 'next/navigation'
@@ -53,6 +54,9 @@ export default function Moment() {
     window.localStorage.setItem(SAVED_ENDS_AT, String(end))
     window.localStorage.setItem(SAVED_ACT, act)
   }
+  function handleAddAct() {
+    router.push('/add-act')
+  }
 
   function handleComplete() {
     window.localStorage.removeItem(SAVED_ENDS_AT)
@@ -73,6 +77,7 @@ export default function Moment() {
 	      >
 		Start a Moment
 	      </button>
+              <BottomButton onClick={handleAddAct}>Add Act</BottomButton>
 	    </div></div>
 	  )
   }
