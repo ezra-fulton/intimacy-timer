@@ -33,11 +33,12 @@ export default function AddActPage() {
       if (userError || !user) {
         throw new Error('Not authenticated')
       }
+      console.log(user)
 
       // 1️⃣ Insert into acts
-      const { data: error } = await supabase.rpc('add_user_act', {p_user_id: user.id, p_heat: heat, p_new_act: act_text})
-      if (error) {
-        console.error('Error adding user act: ', error)
+      const { error: addUserError } = await supabase.rpc('add_user_act', {p_user_id: user.id, p_heat: heat, p_new_act: act_text})
+      if (addUserError) {
+        console.error('Error adding user act: ', addUserError)
         return
       }
       
